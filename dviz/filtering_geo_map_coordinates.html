@@ -1,0 +1,31 @@
+<!doctype html>
+<meta charset="utf-8">
+
+<script src="//d3plus.org/js/d3.js"></script>
+<script src="//d3plus.org/js/topojson.js"></script>
+<script src="//d3plus.org/js/d3plus.js"></script>
+
+<div id="viz"></div>
+
+<script>
+  var sample_data = [
+    {"value": 2315987123, "country": "eufra", "name": "France"},
+    {"value": 38157121349, "country": "euprt", "name": "Portugal"},
+    {"value": 21891735098, "country": "euesp", "name": "Spain"},
+    {"value": 9807134982, "country": "euita", "name": "Italy"}
+  ]
+  
+  var visualization = d3plus.viz()
+    .container("#viz")
+    .data(sample_data)
+    .type("geo_map")
+    .coords({
+      "solo": ["euesp","euita","eufra","euprt"],
+      "value": "http://d3plus.org/topojson/countries.json"
+    })
+    .id("country")
+    .text("name")
+    .color("value")
+    .tooltip("value")
+    .draw()
+</script>

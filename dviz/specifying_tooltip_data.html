@@ -1,0 +1,39 @@
+<!doctype html>
+<meta charset="utf-8">
+
+<script src="http://www.d3plus.org/js/d3.js"></script>
+<script src="http://www.d3plus.org/js/d3plus.js"></script>
+
+<div id="viz"></div>
+
+<script>
+  var sample_data = [
+    {"name": "alpha", "value": 200, "year": 1998, "gender": "female"},
+    {"name": "beta", "value": 125, "year": 2000, "gender": "male"},
+    {"name": "gamma", "value": 300, "year": 1998, "gender": "female"},
+    {"name": "delta", "value": 265, "year": 2000, "gender": "male"},
+    {"name": "epsilon", "value": 300, "year": 1998, "gender": "female"},
+    {"name": "zeta", "value": 305, "year": 2000, "gender": "male"},
+    {"name": "theta", "value": 110, "year": 1998, "gender": "female"},
+    {"name": "eta", "value": 245, "year": 2000, "gender": "male"}
+  ]
+  var connections = [
+    {"source": "alpha", "target": "beta"},
+    {"source": "alpha", "target": "gamma"},
+    {"source": "beta", "target": "delta"},
+    {"source": "beta", "target": "epsilon"},
+    {"source": "zeta", "target": "gamma"},
+    {"source": "theta", "target": "gamma"},
+    {"source": "eta", "target": "gamma"}
+  ]
+  var visualization = d3plus.viz()
+    .container("#viz")
+    .type("rings")
+    .data(sample_data)
+    .id("name")
+    .size("value")
+    .edges(connections)
+    .focus("alpha")
+    .tooltip(["name", "value", "year", "gender"])   // list the keys to show in tooltip
+    .draw()
+</script>

@@ -1,0 +1,44 @@
+
+<!doctype html>
+<meta charset="utf-8">
+
+<script src="http://www.d3plus.org/js/d3.js"></script>
+<script src="http://www.d3plus.org/js/d3plus.js"></script>
+
+<div id="viz"></div>
+
+<script>
+  var sample_data = [
+    {"name": "alpha", "count": 20, "year": 1990},
+    {"name": "beta", "count": 12, "year": 1995},
+    {"name": "gamma", "count": 30, "year": 1990},
+    {"name": "delta", "count": 26, "year": 1990},
+    {"name": "epsilon", "count": 30, "year": 1990},
+    {"name": "zeta", "count": 30, "year": 1990},
+    {"name": "theta", "count": 11, "year": 1995},
+    {"name": "eta", "count": 24, "year": 1995}
+  ]
+  var connections = [
+    {"source": "alpha", "target": "beta"},
+    {"source": "alpha", "target": "gamma"},
+    {"source": "beta", "target": "delta"},
+    {"source": "beta", "target": "epsilon"},
+    {"source": "zeta", "target": "gamma"},
+    {"source": "theta", "target": "gamma"},
+    {"source": "eta", "target": "gamma"}
+  ]
+  var visualization = d3plus.viz()
+    .container("#viz")
+    .type("rings")
+    .data(sample_data)
+    .id("name")
+    .size("count")
+    .edges(connections)
+    .focus("alpha")
+    .descs({
+      "count": "How many apples",  // key referring to data will use string as description
+      "year": "What year it was"   // multiple descriptions possible
+    })
+    .tooltip(["count", "year"])
+    .draw()
+</script>
