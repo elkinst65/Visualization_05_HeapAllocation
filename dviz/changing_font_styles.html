@@ -19,12 +19,12 @@
 var visualization = d3plus.viz()
     .container("#viz")  
     .data(sample_data)  
-    .type("tree_map")   
+    .type("bubbles")   // ["bubbles", "tree_map", "pie"]  ==> "visualization" d3plus.js
     .id("name")         
     .size("value")      
     .mouse({                
       "move": false,                        // key will also take custom function
-      "click": function(){alert("Click!")}   
+      "click": function(){alert("Click Me!")}   
     })          
     .draw()
 
