@@ -2,7 +2,7 @@
 
 <meta charset="utf-8" />
 <head>
-<title>D3 Example</title>
+<title>Titanic D3 Visualization</title>
 <style>
 h1 {
   font-family: sans-serif;
@@ -138,7 +138,7 @@ function makeChart(data){
       .attr("class","axis")
       .attr("transform","translate(0,"+(chartHeight-25)+")")
       .call(xAxis)
-    .append("text")
+      .append("text")
       .text("Click to sample a new passenger.")
       .attr("x", chartHeight-15)
       .attr("dy", 12)
