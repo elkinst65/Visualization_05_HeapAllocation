@@ -1,0 +1,88 @@
+<!-- 
+
+    @authors
+    Ben Brock
+    Tom Elkins
+    Austin Kelly
+
+    Simple Box and Whisker 
+    Here we are using d3.js and d3plus.js libraries to create the graph for the 
+    3d skill visualization.   Rather try to recreate the work from scratch, we
+    are leveraging the work done by the d3plus.org/js/d3.js and 
+    d3plus.org/js/d3plus.js libraries.   Our goal was to gain confidence in using 
+    the libraries to create some nice outputs without doing much coding.
+
+    Here you must understand how to use the d3.js && d3plus.js libraries to your
+    advantage.  This is a lot like object oriented programming, where you have to 
+    know what you are trying to do before doing it.  Then check the libraries to 
+    see if this functionality is already done.  There is no need to recreate the 
+    wheel!!!!
+
+    The graphics effects are great!   
+
+    We created boxplots (box and whisker) plots for the year of 2016 and 2017.
+    Here, we created a dummy dataset for 2016 and 2017.  
+
+    Look at simple it is to create a ui interface 
+    - just by setting the d3.ui attribute
+
+    box: require("./types/box.coffee")
+    box.requirements = ["data", "x", "y"] 
+
+    scatter: require("./types/scatter.coffee")
+    scatter.requirements = ["data", "x", "y"];
+
+    Based on the above, we must set the following variables
+    - data
+    - x
+    - y
+-->
+
+
+<!doctype html>
+<meta charset="utf-8">
+
+<!-- load D3js -->
+<script src="//d3plus.org/js/d3.js"></script>
+
+<!-- load D3plus after D3js -->
+<script src="//d3plus.org/js/d3plus.js"></script>
+
+<div id="viz"></div>
+
+<script>
+  var dataset = [
+    {"year": 2016, "name":"alpha", "value": 15},
+    {"year": 2017, "name":"alpha", "value": 34},
+    {"year": 2016, "name":"alpha2", "value": 17},
+    {"year": 2017, "name":"alpha2", "value": 65},
+    {"year": 2016, "name":"beta", "value": 10},
+    {"year": 2017, "name":"beta", "value": 10},
+    {"year": 2016, "name":"beta2", "value": 40},
+    {"year": 2017, "name":"beta2", "value": 38},
+    {"year": 2016, "name":"gamma", "value": 5},
+    {"year": 2017, "name":"gamma", "value": 10},
+    {"year": 2016, "name":"gamma2", "value": 20},
+    {"year": 2017, "name":"gamma2", "value": 34},
+    {"year": 2016, "name":"delta", "value": 50},
+    {"year": 2017, "name":"delta", "value": 43},
+    {"year": 2016, "name":"delta2", "value": 17},
+    {"year": 2017, "name":"delta2", "value": 35}
+  ]
+
+  // instantiate d3plus
+  var visualization = d3plus.viz()
+    .container("#viz")
+    .data(dataset)
+    .type("box")
+    .id("name")
+    .x("year")
+    .y("value")
+    .time("year")
+    .ui([{ 
+        "label": "Visualization Type",
+        "method": "type", 
+        "value": ["scatter","box"]
+      }])
+    .draw()   // draw the visualization!
+</script>

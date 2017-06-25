@@ -1,0 +1,61 @@
+<!-- 
+
+    @authors
+    Ben Brock
+    Tom Elkins
+    Austin Kelly
+
+    Graph 3D Radar Skill Viz
+    Here we are using d3.js and d3plus.js libraries to create the graph for the 
+    3d skill visualization.   Rather try to recreate the work from scratch, we
+    are leveraging the work done by the d3plus.org/js/d3.js and 
+    d3plus.org/js/d3plus.js libraries.   Our goal was to gain confidence in using 
+    the libraries to create some nice outputs without doing much coding.
+
+    Here you must understand how to use the d3.js && d3plus.js libraries to your
+    advantage.  This is alot like obeject oriented programming, where you have to 
+    know what you are trying to do before doing it.  Then check the libraries to 
+    see if this functionality is already done.  There is no need to recreate the 
+    wheel!!!!
+
+    The graphics effects are great!   We measured the skills of a novice, junior, 
+    and expert data scientist using the d3 radar function.
+
+    radar.requirements = ["data", "size"];
+
+    Based on the above, we must set the following variables
+    - data
+    - size
+-->
+
+
+<!doctype html>
+<meta charset="utf-8">
+
+<!-- load D3js -->
+<script src="//d3plus.org/js/d3.js"></script>
+
+<!-- load D3plus after D3js -->
+<script src="//d3plus.org/js/d3plus.js"></script>
+
+<div id="viz"></div>
+
+<script>
+  var dataset = [
+    {"name": "alpha", "skill": "novice", "value": 4},
+    {"name": "alpha", "skill": "junior", "value": 8},
+    {"name": "alpha", "skill": "expert", "value": 2},
+    {"name": "beta", "skill": "novice", "value": 5},
+    {"name": "beta", "skill": "junior", "value": 4},
+    {"name": "beta", "skill": "expert", "value": 6}
+  ];
+
+  // instantiate d3plus
+  var visualization = d3plus.viz()
+    .container("#viz")
+    .data(dataset)
+    .id(["name", "skill"])
+    .size("value")
+    .type("radar")
+    .draw();    // draw the visualization!
+</script>
