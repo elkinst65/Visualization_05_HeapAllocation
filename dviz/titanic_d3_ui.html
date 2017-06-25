@@ -1,0 +1,403 @@
+<!-- 
+
+    @authors
+    Ben Brock
+    Tom Elkins
+    Austin Kelly
+
+    Titanic d3 User Interface (UI) 
+
+    Our goal here was to read the titanic dataset using d3 and determine if a
+    passenger survived or not.   The program reads all of the passengers demographics 
+    are read along with the price of the fare paid by each passenger. 
+
+    We tried to use proven d3 frameworks and patterns used by well known d3 visualization 
+    leaders when doing our development.
+
+    passenger_survival_display_ui: 
+    A 2-dimensional user interface to show if a passenger survived or not.
+  
+    create_gender_legend_chart
+    Female/Male legend showing which color is associated with a male or female
+
+    create_survived_legend_chart
+    Passenger Survived legend showing which color is associated with passenger if they
+    survived or not.
+
+    The 2 dimensional display will show a scatterplot of a set number of titanic passengers
+    in the x-y 2D space.   Each point represents a specific passenger.  Additionally, each
+    point has dynamic functionality,  
+
+    hover events
+    mouseover functionality:  lists the name of the passenger
+    mouseout functionality: points go back to normal state.
+    on mouseover:  lists the name of the passenger, shows the stroke if passenger survives
+    or not.
+    click on: grab_new_passengers which get the next set of passengers to display 
+
+    Here we are using d3.js and d3plus.js libraries to create the graph for the 
+    3d skill visualization.   Rather than try to recreate the work from scratch, we
+    are leveraging the work done by the d3plus.org/js/d3.js and 
+    d3plus.org/js/d3plus.js libraries.   Our goal was to gain confidence in using 
+    the libraries to create some nice outputs without doing much coding.
+
+    Here you must understand how to use the d3.js && d3plus.js libraries to your
+    advantage.  This is a lot like object oriented programming, where you have to 
+    know what you are trying to do before doing it.  Then check the libraries to 
+    see if this functionality is already done.  There is no need to recreate the 
+    wheel!!!!
+
+    References:
+    http://codeactually.com/d3.html
+    https://bost.ocks.org/mike/selection/
+    https://d3js.org/
+    https://bl.ocks.org/mbostock/3808218
+-->
+
+<html>
+
+<meta charset="utf-8" />
+<head>
+<title>Titanic D3 Visualization</title>
+<style>
+h1 {
+  font-family: sans-serif;
+  text-align: center;
+}
+
+svg {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  border: 2px solid black;
+}
+
+svg text {
+  font-size: 11px;
+  font-family: sans-serif;
+  text-anchor: middle;
+  fill: black;
+}
+
+</style>
+<script src="../d3/d3.js" charset="utf-8"></script>
+<!-- <script src="https://d3js.org/d3.v4.min.js" charset="utf-8"></script> -->
+</head>
+</head>
+
+<body>
+<h1>Titanic D3 Visualization</h1>
+<svg class="chart"></svg>
+
+<script>
+
+/*******************************
+ * Global Variable Definitions *
+ *******************************/
+var width = 500;
+var height = 500;
+var dataset;
+var duration_time_n_milliseconds = 1000; 
+var delay_time_n_milliseconds = 1000; 
+var index = 0;
+var DATA_SIZE = 20;
+var x_position;
+var y_position;
+var c_color;
+var s;
+var r_radius;
+var x_axis;
+var y_axis;
+
+/*********************************************************************
+ * Read the titanic dataset
+ * Per Passenger basis
+ * name
+ * survived 
+ * sex 
+ * age
+ * fare
+ * key 
+ * 
+ * This is a standard basic framework/pattern used to read a file using
+ * d3.   Here we read the titanic csv file and set the internal
+ * variables needed for each passenger.
+ * If there is any error reading the file, the program will output the
+ * error message to the console.  
+ *
+ * If there is no error reading the file, display the set number of 
+ * passengers in the passenger survival user interface (ui)
+ * 
+ *******************************************************************/
+d3.csv("titanic_dataset.csv",function(row,i){
+  return {
+    name: row.name,
+    survived: (row.survived == 1) ? "Yes": "No",
+    sex: row.sex,
+    age: +row.age,
+    fare: +row.fare,
+    key: i
+  };
+},function(error,rows){
+  if(error){
+    console.log(error);
+  }
+
+  // Sort the data, save it, and display to the passenger survival ui
+  rows.sort(function(a,b) { return (a.name).localeCompare(b.name);});
+  dataset = rows;
+  passenger_survival_display_ui(rows.slice(index, (index + DATA_SIZE)));
+});
+
+// anonymous function to return the key for each passenger 
+// in the dataset
+// similar to a dictionary
+var key = function(d){ return d.key; };
+
+/************************************************
+ * Passenger Survival User Interface (UI) *
+ ************************************************/
+function passenger_survival_display_ui(data){
+
+  // y_position related to passenger's age
+  y_position = d3.scaleLinear()
+      .domain(d3.extent(dataset,function(d){ return d.age; }))
+      .range([470,10]);
+
+  // c_color relationships 
+  // male-darkblue
+  // female-deeppink
+  c_color = d3.scaleOrdinal()
+      .domain(["male","female"])
+      .range(["darkblue","deeppink"]);
+
+  // stroke relationships
+  // Survival
+  // No - red
+  // Yes - blue
+  s = d3.scaleOrdinal()
+      .domain(["No","Yes"])
+      .range(["red","blue"]);
+
+  // r_radius relationships related to the passenger's fare
+  r_radius = d3.scaleLinear()
+      .domain([0,d3.max(dataset,function(d){ return d.fare; })])
+      .range([5,50]);
+
+  // chart showing the width and height
+  var canvas = d3.select(".chart")
+                 .style("width",width)
+                 .style("height",height);
+
+  update_ui(data);
+
+  x_axis = d3.axisBottom()
+      .scale(x_position)
+      .ticks(0);
+
+  y_axis = d3.axisLeft()
+      .scale(y_position);
+
+  var y_axis_group = canvas.append("g")
+      .attr("class","axis")
+      .attr("transform","translate(25,0)")
+      .call(y_axis);
+
+  y_axis_group.selectAll("text")
+      .attr("transform", "translate(-5,0)");
+
+  y_axis_group.append("text")
+      .text("Age of Passenger")
+      .attr("transform", "rotate(-90)")
+      .attr("y", 15)
+      .attr("dx", -10)
+      .style("font-weight","bold")
+      .style("text-anchor", "end");
+
+  canvas.append("g")
+      .attr("class","axis")
+      .attr("transform","translate(0,"+(height-25)+")")
+      .call(x_axis)
+      .append("text")
+      .text("Click the mouse inside x-y frame above to sample a new set of passengers.")
+      .attr("x", height-15)
+      .attr("dy", 12)
+      .style("font-weight","bold")
+      .style("text-anchor", "end");
+
+  canvas.on("click",function(){
+    grab_new_passengers(++index, (index + DATA_SIZE));
+    index = (index % dataset.length);
+  });
+
+  create_gender_legend_chart();
+  create_survived_legend_chart();
+
+}
+
+/**************************
+ * Gender Legend Chart *
+ **************************/
+function create_gender_legend_chart() {
+  
+  var legend = d3.select(".chart")
+      .selectAll(".legend")
+      .data(c_color.domain().slice().reverse())
+      .enter()
+      .append("g")
+      .attr("class","legend")
+      .attr("transform",function(d,i) {
+        return "translate(0," + i * 20 + ")";
+      });
+
+  legend.append("rect")
+      .attr("x",475)
+      .attr("y",9)
+      .attr("width",18)
+      .attr("height",18)
+      .style("fill",c_color);
+
+  legend.append("text")
+      .attr("x",465)
+      .attr("y",18)
+      .attr("dy",".40em")
+      .style("text-anchor","end")
+      .text(function(d) {
+        return d.charAt(0).toUpperCase()+d.slice(1);
+      });
+}
+
+/**************************
+ * Survived Legend Chart *
+ **************************/
+function create_survived_legend_chart() {
+
+  var group = d3.select(".chart")   // selects an element with the class "chart".
+                .append("g")
+                .attr("class","legend-group");
+
+  group.append("text")
+      .text("Ship Passenger Survived?")
+      .attr("x",493)
+      .attr("y",59)
+      .style("font-weight","bold")
+      .style("text-anchor","end");
+
+  var legend = group.selectAll(".legend")
+      .data(s.domain().slice().reverse())
+      .enter()
+      .append("g")
+      .attr("class","legend")
+      .attr("transform",function(d,i) {
+        return "translate(0," + i * 20 + ")";
+      });
+
+  legend.append("rect")
+      .attr("x",475)
+      .attr("y",65)
+      .attr("width",18)
+      .attr("height",18)
+      .style("fill",s);
+
+  legend.append("text")
+      .attr("x",465)
+      .attr("y",73)
+      .attr("dy",".35em")
+      .style("text-anchor","end")
+      .text(function(d) { return d; });
+}
+
+/******************************
+ * Update User Interface (UI) *
+ *****************************/
+function update_ui(data){
+
+  //bind data with the key
+  var scatter = d3.select(".chart")  // selects an element with the class "chart".
+      .selectAll("circle")
+      .data(data,key);
+
+  // x position
+  x_position = d3.scaleLinear()
+      .domain([0,data.length-1])
+      .range([30,500]);
+
+  //update
+  scatter.attr("stroke-width","5px");
+
+  //enter
+  var enter = scatter
+      .enter()
+      .append("circle")
+      .attr("fill-opacity",0.85)
+      .attr("r",5)
+      .attr("cx",function(d,i){ return x_position(i); })
+      .attr("cy",function(d){ return y_position(d.age); })
+      .attr("stroke",function(d){ return s(d.survived); })
+
+    // Handle the mouseover functionality
+    .on("mouseover",function(d){
+      d3.select(this).transition()
+        .attr("stroke-width","5px")
+        .attr("r",r_radius(d.fare));
+    })
+
+    // Handle the mouseout functionality
+    .on("mouseout",function(){
+      d3.select(this)
+        .transition()
+        .delay(delay_time_n_milliseconds)
+        .attr("stroke-width","0px")
+        .attr("r",5);
+    });
+
+  // Add a title to the point (on mouseover)
+  enter.append("svg:title")
+      .text(function(d){ return d.name;});
+
+  // Enter and update
+  //
+  /*
+    The general update pattern with a data join appends entering elements 
+    and removes exiting elements, while modifying dynamic attributes, styles
+    and other properties of updating elements
+
+    Reference:  https://bl.ocks.org/mbostock/3808218
+
+  */
+  enter.merge(scatter)
+      .transition()
+      .duration(duration_time_n_milliseconds)
+      .attr("cx",function(d,i){ return x_position(i); })
+      .attr("cy",function(d){ return y_position(d.age);})
+      .attr("fill",function(d){ return c_color(d.sex)})
+      .attr("stroke",function(d){ return s(d.survived)})
+      .attr("stroke-width","0px");
+
+  // scatter.exit()
+  // animate the exiting sequence
+  // wait for a specified duration to remove as needed
+  scatter.exit()
+         .transition()
+         .duration(duration_time_n_milliseconds)
+         .attr("cx",0)
+         .attr("fill-opacity",0)
+         .remove();
+}
+
+function grab_new_passengers(start_point, end_point){
+
+  if(end_point <= dataset.length){
+
+    update_ui(dataset.slice(start_point, end_point));
+  }
+  else{
+
+    var leftover = end_point - dataset.length;
+    update_ui(dataset.slice(start_point, dataset.length).concat(dataset.slice(0,leftover)));
+  }
+}
+
+</script>
+</body>
+</html>
