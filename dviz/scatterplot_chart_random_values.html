@@ -1,0 +1,206 @@
+<!-- 
+
+    @authors
+    Ben Brock
+    Tom Elkins
+    Austin Kelly
+
+     Scatterplot chart of Random Values
+     Created plumbing to create a scatter plot of random values displayed on
+     a 2-D x-y axes.  The program dynamically creates the min and max range for both
+     the x and y axes.  This is a great programming relief.
+
+     Used the following d3 framework to solve the problem:
+     Setup the Heading Tags
+       - Name the title page of the page
+     Setup the Body Tags
+     * Initial state of all of the 2D scatterplot page of num_data_points random 
+       values
+        - set the width and height of the page
+        - set the number of data points in the random list of numbers
+        - create list of random values for the list size
+        - create the x_scale and y_scale dynamic functions
+        - Define the x_axis and y_axis
+        - Glue or create the svg (Scalable Vector Graphics) Framework/pattern to
+          contain or glue the 2D scene with the circles, x_axis, and y_axis via d3
+    * When the user clicks on the TEXT will capture changes via the d3.on() function
+      signalling event will trigger the following:
+      Note:  We had to put in all of the plumbing within the code base to make sure
+      everything is working properly using the d3 framework.
+        - create new list of random values for the list size
+        - create the x_scale and y_scale dynamic functions
+        - Define the x_axis and y_axis
+        - Glue or create the svg (Scalable Vector Graphics) Framework/pattern to
+          contain or glue the 2D scene with the circles, x_axis, and y_axis via d3
+-->
+
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<title>Display Scatterplot of Random Values using d3.transitions and d3.durations Feature</title>
+		<!-- <script type="text/javascript" src="../d3/d3.v3.js"></script> -->
+		<script src="https://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+		<style type="text/css">
+			
+		
+			.axis path,
+			.axis line {
+				fill: none;
+				stroke: black;
+				shape-rendering: optimizeSpeed; <!-- ["crispEdges", "geometricPrecision", "optimizeSpeed", "auto"] -->
+			}
+			
+			.axis text {
+				font-family: sans-serif;
+				font-size: 12px;
+			}
+
+		</style>
+	</head>
+	<body>
+	
+		<p><strong>Click Text To Update The Scatterplot Scene With Set of New Random Data Values.</strong></p>
+	
+		<script type="text/javascript">
+
+			//Width and height
+			var width = 1000;
+			var height = 500;
+			var padding = 40;
+			
+			//Dynamic, random dataset
+			var dataset = [];											//Clear the list
+			var num_data_points = 120;									//Number of dummy data values
+			var max_range = Math.random() * 1000;						//Max range of new values
+
+			// create list of random values of (x,y)
+			for (var i = 0; i < num_data_points; i++) {					
+				var x_value_number = Math.floor(Math.random() * max_range);	//New x_value
+				var y_value_number = Math.floor(Math.random() * max_range);	//New y_value
+				dataset.push([x_value_number, y_value_number]);				//Add (x,y) to list
+			}
+
+			//Create scale dynamic functions
+			var x_scale = d3.scale.linear()
+								 .domain([0, d3.max(dataset, function(d) { return d[0]; })])
+								 .range([padding, width - padding * 2]);
+
+			var y_scale = d3.scale.linear()
+								 .domain([0, d3.max(dataset, function(d) { return d[1]; })])
+								 .range([height - padding, padding]);
+
+			//Define X axis
+			var x_axis = d3.svg.axis()
+							  .scale(x_scale)
+							  .orient("bottom")
+							  .ticks(5);
+
+			//Define Y axis
+			var y_axis = d3.svg.axis()
+							  .scale(y_scale)
+							  .orient("left")
+							  .ticks(5);
+
+            // Let's Glue the 2D scene together
+			//Create SVG element
+			var svg = d3.select("body")
+						.append("svg")
+						.attr("width", width)
+						.attr("height", height);
+
+			// Create darkgreen circles with 
+			// x_value via anonmymous function  --> d[0]
+			// y_value via anonmymous function  --> d[1]
+			// a radius of 4
+			svg.selectAll("circle")
+			   .data(dataset)
+			   .enter()
+			   .append("circle")
+			   .attr("fill", "darkgreen")
+			   .attr("cx", function(d) {    
+			   		return x_scale(d[0]);
+			   })
+			   .attr("cy", function(d) {
+			   		return y_scale(d[1]);
+			   })
+			   .attr("r", 4);
+			
+			//
+			//Now let's glue the X axis
+			svg.append("g")
+				.attr("class", "x axis")
+				.attr("transform", "translate(0," + (height - padding) + ")")
+				.call(x_axis);
+			
+			//Finally, let's glue the Y axis
+			svg.append("g")
+				.attr("class", "y axis")
+				.attr("transform", "translate(" + padding + ",0)")
+				.call(y_axis);
+
+
+
+			//On click, update with new random (x,y) data values			
+			d3.select("p")
+				.on("click", function() {
+
+					//New values for dataset
+					//Count original length of dataset
+					var total_number_of_values = dataset.length;						 		
+
+					var duration_time_n_milliseconds = 2000;            //duration time in milliseconds
+					var max_range = Math.random() * 1000;				//Max range of random values
+					dataset = [];  						 				//clear the dataset
+
+					// create list of random values of (x,y)
+					for (var i = 0; i < total_number_of_values; i++) {		
+						var x_value_number = Math.floor(Math.random() * max_range);	
+						var y_value_number = Math.floor(Math.random() * max_range);	
+						dataset.push([x_value_number, y_value_number]);	 //Add new (x,y) random number 
+						                                                 // to the list
+					}
+					
+					//Update scale domains of x_scale and y_scale
+					x_scale.domain([0, d3.max(dataset, function(d) { return d[0]; })]);
+					y_scale.domain([0, d3.max(dataset, function(d) { return d[1]; })]);
+
+					//Update all circles in the svg frame
+					svg.selectAll("circle")
+					   .data(dataset)
+					   .transition()        // animate the transition 
+					   .duration(duration_time_n_milliseconds)  // for a specific duration
+					   .each("start", function() {      // start or entry point
+						   d3.select(this)
+						     .attr("fill", "orangered")   // color the circles orangered
+						     .attr("r", 10);              // radius of 10
+					   })
+					   .attr("cx", function(d) {
+					   		return x_scale(d[0]);
+					   })
+					   .attr("cy", function(d) {
+					   		return y_scale(d[1]);
+					   })
+					   .transition()         // new (end) transition let's animate the change
+					   .duration(duration_time_n_milliseconds)   // for a specific duration time 
+					   .attr("fill", "darkgreen")                // darkgreen
+					   .attr("r", 4);                            // radius of 4
+
+					//Update X axis
+					svg.select(".x.axis")
+				    	.transition()  // animate 
+				    	.duration(duration_time_n_milliseconds) // for a specific duration
+						.call(x_axis);
+					
+					//Update Y axis
+					svg.select(".y.axis")
+				    	.transition()  // animate
+				    	.duration(duration_time_n_milliseconds) // for a specific duration
+						.call(y_axis);
+
+				});
+
+
+		</script>
+	</body>
+</html>
